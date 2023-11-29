@@ -143,14 +143,8 @@ outputs = decoder_out(h_p2)
 def vae_loss(y_true, y_pred):
     recon = K.sum(K.abs(y_true-y_pred), axis=-1)
     kl = 0.5 * K.sum(K.exp(l_sigma) + K.square(mu) - 1. - l_sigma, axis=-1)
-    return recon + 0.1 * kl 
-# * kl/(kl + recon)
-#     return recon +  kl
-
-# def cvae_loss(y_true, y_pred):
-#     recon = K.sum(K.abs(y_true-y_pred), axis=-1)
-#     kl = 0.5 * K.sum(K.exp(l_sigma) + K.square(mu) - 1. - l_sigma, axis=-1)
-#     return recon +  kl
+    return recon + kl/(kl + recon) * kl 
+#     return recon +  kl (commomn format)
 
 def KL_loss(y_true, y_pred):
     return(0.5 * K.sum(K.exp(l_sigma) + K.square(mu) - 1. - l_sigma, axis=1))
@@ -191,7 +185,7 @@ process_time = end_time - start_time
 print(process_time)
 
 
-# 利用学习的正态分布生成虚拟数据
+# Generate virtual data by normal distributions
 z_train = encoder.predict([X_train, y_train])
 encodings= np.asarray(z_train)
 encodings = encodings.reshape(X_train.shape[0], n_z)
@@ -342,7 +336,7 @@ print('WMCVAE-RF',rs_ii, CAVE_RF_accuracy, CAVE_RF_recall, CAVE_RF_precision, CA
 confusion_matrix = metrics.confusion_matrix(Y_test, Y_pred)
 print(confusion_matrix)
 
-# 使用imlbearn库中上采样方法中的SMOTE接口
+# Apply the conventional data augmentation methods as a comparison using the imlbearn library
 from imblearn.over_sampling import RandomOverSampler 
 from imblearn.over_sampling import SMOTE, ADASYN
 r_s = 200
